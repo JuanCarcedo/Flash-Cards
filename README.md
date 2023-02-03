@@ -5,7 +5,7 @@ Note that your user will be used to save your already-known words and the ones t
 ## Instructions
 - Create a Fork of the repository (you can access all projects).
 - Open your favourite IDE (I use [PyCharm](https://www.jetbrains.com/pycharm/)).
-- Check the ***[requirements.txt](https://github.com/JuanCarcedo/jca-python-projects/blob/main/requirements.txt)*** file.  
+- Check the ***[requirements.txt](https://github.com/JuanCarcedo/Flash-Cards/blob/main/requirements.txt)*** file.  
   - For this project you will need:
     + tkinter.
 
@@ -42,4 +42,4 @@ Answer:
 
 ## Author and Licence
 **[Juan Carcedo](https://github.com/JuanCarcedo)**  
-2022 Copyright © - Licence [MIT](https://github.com/JuanCarcedo/jca-python-projects/blob/main/LICENSE.txt)
+2022 Copyright © - Licence [MIT](https://github.com/JuanCarcedo/Flash-Cards/blob/main/LICENSE)
