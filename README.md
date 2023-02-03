@@ -2,7 +2,7 @@
 This program may help you in your path to learn spanish.  
 Note that your user will be used to save your already-known words and the ones to be learnt.  
   
-Version Updates:  
+### Version Updates:  
 + v2 -- 2022/11/01 - Redesign all.
 
 ## Instructions
