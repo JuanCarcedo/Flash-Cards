@@ -1,9 +1,10 @@
 # Flash Cards Spanish-English
-This program may help you in your path to learn spanish.  
+This program may help you in your path to learn Spanish.  
 Note that your user will be used to save your already-known words and the ones to be learnt.  
   
 ### Version Updates:  
-+ v2 -- 2022/11/01 - Redesign all.
++ v2 -- 2022/11/01 - General redesign.
++ v3 -- 2023/02/04 - New GUI
 
 ## Instructions
 - Create a Fork of the repository (you can access all projects).
@@ -11,6 +12,8 @@ Note that your user will be used to save your already-known words and the ones t
 - Check the ***[requirements.txt](https://github.com/JuanCarcedo/Flash-Cards/blob/main/requirements.txt)*** file.  
   - For this project you will need:
     + tkinter.
+    + pandas.
+    + [customtkinter](https://github.com/TomSchimansky/CustomTkinter)
 
 ### Note: 
 All data is saved in CSV files. Feel free to view them in:  
@@ -22,12 +25,16 @@ Please do not modify the names of these files.
 ## How to use
 1) Run the file ```main.py```.
 2) Log in into the system. If your user does not exist, the program will create it.
-3) Click the refresh button to start the game.
-4) Click "Full text" if you cannot see the full word (or definition).
-5) To know if you guessed right, click "Answer".
-6) Select "Happy face" if you were right, "Sad face" if not.
-   - Do not cheat!
-7) Whenever you want to exit please click the door button.  
+3) Click the New Word button to start.
+4) Select 
+   - "I don't know" if you do not know the answer.
+   - "I know" if you know it.
+5) Click "Check answer" to show the correct answer.
+   - If you marked "I know", the word will be included in your correct answers. 
+6) Rinse and repeat.
+7) Whenever you want to exit please click "Save & Exit".
+   - Your progress will be saved.  
+
 Enjoy!
 
 ## Example of output
@@ -45,4 +52,4 @@ Answer:
 
 ## Author and Licence
 **[Juan Carcedo](https://github.com/JuanCarcedo)**  
-2022 Copyright © - Licence [MIT](https://github.com/JuanCarcedo/Flash-Cards/blob/main/LICENSE)
+2022 - 2023 Copyright © - Licence [MIT](https://github.com/JuanCarcedo/Flash-Cards/blob/main/LICENSE)

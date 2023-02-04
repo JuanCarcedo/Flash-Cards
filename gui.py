@@ -1,184 +1,205 @@
 """
     gui.py
     Control the gui and other methods.
-    :copyright: (c) 2022 Juan Carcedo, All rights reserved
+    :copyright: (c) 2022-2023 Juan Carcedo, All rights reserved
     :licence: MIT, see LICENSE.txt for further details.
+    - v3 02/2023:
+        GUI: Updated using customtkinter by TomSchimansky [https://github.com/TomSchimansky/CustomTkinter]
+        Code: Some enhancements to structure.
 """
+
 import tkinter as tk
-from tkinter import messagebox
-from PIL import Image, ImageTk
+import customtkinter as ctk
 from datamanager import DataManager
 
-FONT_CARD = ('Consolas', 30, 'bold')
-FONT_TEXT = ('Consolas', 30, 'bold')
-FONT_LANG = ('Consolas', 30, 'italic')
-FLASHCARD_FRONT = "./images/flashcard_front_v2.png"
-FLASHCARD_BACK = "./images/flashcard_back_v2.png"
-BUTTON_W = "./images/icon_wrong_v2.png"
-BUTTON_R = "./images/icon_right_v2.png"
-BUTTON_REFRESH = "./images/icon_refresh_v2.png"
-BUTTON_ANSW = "./images/icon_answer.png"
-EXIT = "./images/exit.png"
-BG_COLOR = '#A6F7C3'  # green
+# Config of customtkinter
+ctk.set_appearance_mode('System')
+ctk.set_default_color_theme('blue')  # Available: Blue, dark-blue, green
+
+# CONSTANTS ============
 INIT_TEXT = '''Welcome to the self study method with flashcards.
 This program will store your right answers and your wrong answers separately.
 Note "nn" equals "ñ". Example castanna is castaña.
 Exit button will exit the application and save data.
 '''
-ES = 'Spanish'
-EN = 'English'
+M_SECONDS_WAIT = 3000
 
 
-class GetUsername:
-    """
-    Manage the username's first inputs
-    """
+class UsernameManager(ctk.CTk):
+    """Manage the user's login (gather the username)"""
+
     def __init__(self):
-        self.__window = tk.Tk()
-        self.__window.config(padx=10, pady=10)
-        self.__window.title('Log in')
+        super().__init__()
+        self.config(padx=10, pady=10)
+        self.title('Log in')
         self.__basic_structure()
-        self.__window.mainloop()
 
     def __basic_structure(self):
-        tk.Label(self.__window, text="Please, enter your username:",
-                 font=('Arial', 15)).pack()
+        ctk.CTkLabel(self, text="Please, enter your username:", font=('Arial', 15)).pack()
         self.input_username = tk.StringVar()
-        entry_username = tk.Entry(self.__window, textvariable=self.input_username)
+        entry_username = ctk.CTkEntry(self, textvariable=self.input_username)
         entry_username.pack(padx=10, pady=10)
         entry_username.focus()
-        tk.Button(self.__window, text='Ok', command=lambda: self.__window.destroy()).pack()
+        ctk.CTkButton(self, text='Ok', command=lambda: self.destroy()).pack()
+
+    def end_screen(self) -> None:
+        """End program."""
+        self.mainloop()
 
     def get_username(self):
         return self.input_username.get()
 
 
-class InterfaceManager:
+class App(ctk.CTk):
+    TITLE_APP = 'Flashcard learning'
+    __username = 'New'
 
-    def __init__(self, username: str = None):
-        assert username, 'Please check username input. Something went wrong.'
-        self.username = username
-        self.data = DataManager(username)
-        self.__root = tk.Tk()
-        self.__root.title('Learn languages JCA')
-        self.__root.configure(padx=20, pady=20, height=800, width=1400, bg=BG_COLOR)
-        self.__create_structure()
+    def __init__(self, username: str = ''):
+        super().__init__()
 
-    def welcome_message(self):
-        messagebox.showinfo(title='Welcome', message=INIT_TEXT)
+        # Set the username (program based on that)
+        self.set_username(username)
 
-    def end_screen(self):
-        self.__root.mainloop()
+        # Get the data
+        self.data = DataManager(self.get_username())
 
-    def __create_structure(self):
-        lb_title = tk.Label(text=f'Hello, {self.username}', font=FONT_TEXT,
-                            justify='center', bg=BG_COLOR, fg='black')
-        lb_title.grid(column=1, row=0, sticky='n')
-        self.__flash_cards()
-        self.__buttons()
+        # GUI
+        self.eval('tk::PlaceWindow . center')  # Set the window to the middle of screen
+        self.title(self.TITLE_APP)
+        self.geometry('500x300')
+        # Create welcome pop-up
+        self.welcome_screen()
 
-    def __flash_cards(self):
-        # Flashcard front -------------------------------------------------
-        self.im_flacar_frt = tk.PhotoImage(file=FLASHCARD_FRONT)
-        self.fc_front = tk.Canvas(self.__root,
-                                  width=600, height=300,
-                                  highlightthickness=0, bg=BG_COLOR)
-        self.fc_front.create_image(300, 150, image=self.im_flacar_frt)
-        text_word = 'Please click refresh button'
-        self.txt_front = self.fc_front.create_text(300, 180,
-                                                   text=text_word,
-                                                   font=FONT_CARD,
-                                                   fill='black')
-        text_front_lang = self.fc_front.create_text(300, 90,
-                                                    text=ES,
-                                                    font=FONT_LANG,
-                                                    fill='black')
-        # Canvas button full text
-        self.bt_front_ft = tk.Button(self.fc_front,
-                                text='Full text',
-                                command=lambda: self.show_full_text(self.data.guess))
-        bt_wind_front = self.fc_front.create_window(300, 255, window=self.bt_front_ft)
-        # Display canvas
-        self.fc_front.grid(column=0, row=1, columnspan=3, pady=(10, 10))
-        # Flashcard back -- Initially hidden  -----------------
-        self.imag_flacar_bck = tk.PhotoImage(file=FLASHCARD_BACK)
-        self.fc_back = tk.Canvas(self.__root, width=600, height=300,
-                                 highlightthickness=0, bg=BG_COLOR)
-        self.fc_back.create_image(300, 150, image=self.imag_flacar_bck)
-        text_answer = 'Hey! click refresh \nbutton first (no peeking!)'
-        self.txt_back = self.fc_back.create_text(300, 180,
-                                                 text=text_answer,
-                                                 font=FONT_CARD,
-                                                 fill='black')
-        text_back_lang = self.fc_back.create_text(300, 90,
-                                                  text=EN,
-                                                  font=FONT_LANG,
-                                                  fill='black')
-        # Canvas button full text
-        self.bt_back_ft = tk.Button(self.fc_back,
-                               text='Full text',
-                               command=lambda: self.show_full_text(self.data.solution))
-        bt_wind_back = self.fc_back.create_window(300, 255, window=self.bt_back_ft)
-        self.fc_back.grid(column=0, row=1, columnspan=3, pady=(10, 10))
-        self.fc_back.grid_remove()  # Hide the card to unhide call grid again
+        # Building
+        self.grid_columnconfigure(1, weight=1)
+        self.__build_welcome()
+        self.__build_words()
+        self.__build_option_menus()
+        self.__build_bottom()
 
-    def __buttons(self):
-        # Load images for buttons // Create the button // Put in grid
-        self.img_w = Image.open(BUTTON_W)
-        self.img_bt_wrong = ImageTk.PhotoImage(self.img_w)
-        self.bt_wrong = tk.Button(self.__root, image=self.img_bt_wrong,
-                             command=self.bt_wrong, highlightthickness=0)
-        self.bt_wrong.grid(column=0, row=2)  # , sticky='nw')
-        self.img_r = Image.open(BUTTON_R).resize((100, 95))
-        self.img_bt_right = ImageTk.PhotoImage(self.img_r)
-        self.bt_right = tk.Button(self.__root, image=self.img_bt_right,
-                             command=self.bt_correct, highlightthickness=0)
-        self.bt_right.grid(column=2, row=2)  # , sticky='ne')
-        self.img_ref = Image.open(BUTTON_REFRESH).resize((85, 88))
-        self.img_bt_refresh = ImageTk.PhotoImage(self.img_ref)
-        self.bt_refresh = tk.Button(self.__root, image=self.img_bt_refresh,
-                               command=self.get_new_word, highlightthickness=0)
-        self.bt_refresh.grid(column=0, row=0)  # , sticky='nw')
-        self.img_exit = Image.open(EXIT).resize((50, 50))
-        self.img_bt_exit = ImageTk.PhotoImage(self.img_exit)
-        self.bt_exit = tk.Button(self.__root, image=self.img_bt_exit,
-                            command=self.save_quit)
-        self.bt_exit.grid(column=2, row=0)  # , sticky='ne')
-        self.img_ans = Image.open(BUTTON_ANSW)
-        self.img_bt_answer = ImageTk.PhotoImage(self.img_ans)
-        self.bt_answer = tk.Button(self.__root, image=self.img_bt_answer,
-                              command=self.bt_show_answer, highlightthickness=0)
-        self.bt_answer.grid(column=1, row=2)
+    def welcome_screen(self):
+        """Create a welcome screen."""
+        window = ctk.CTkToplevel(self)
+        window.title('Welcome!')
+        window.geometry('500x150')
+        label = ctk.CTkLabel(window, text=INIT_TEXT)
+        label.pack(side='top', fill='both', expand=True, padx=20, pady=(10, 0))
+        button_exit = ctk.CTkButton(window, text='Continue', command=lambda: window.destroy())
+        button_exit.pack(fill='both', padx=20, pady=20)
 
-    # ---- Buttons behaviour ----- #
-    def save_quit(self):
-        self.data.save_data(self.username)
-        self.__root.destroy()
+    def end_screen(self) -> None:
+        """End program."""
+        self.mainloop()
 
-    def get_new_word(self):
+    # Building the GUI ===================================================================
+    def __build_welcome(self):
+        self.legend_label = ctk.CTkLabel(self, text=f'Player: {self.get_username()}',
+                                         font=ctk.CTkFont(size=25, weight='bold'))
+        self.legend_label.grid(row=0, column=0, columnspan=3, padx=10, pady=(10, 10))
+
+    def __build_words(self):
+        """Flashcard building. """
+        self.__label_learning_word = ctk.CTkLabel(self, text=self.data.get_word_to_guess(), font=ctk.CTkFont(size=20))
+        self.__label_learning_word.grid(row=1, column=0, columnspan=3, padx=10, pady=(15, 15))
+
+    def __build_option_menus(self):
+        """Create menus/options available"""
+        # Options menus -----
+        self.frame_user = ctk.CTkFrame(self, width=300, fg_color='transparent')
+        self.frame_user.grid(row=2, column=0, columnspan=2)
+
+        # Refresh/new word or Exit
+        self.frame_options = ctk.CTkFrame(self.frame_user, width=125)
+        self.frame_options.grid(row=0, column=0, rowspan=3, columnspan=1, padx=(15, 5))
+        self.btn_new_word = ctk.CTkButton(self.frame_options, command=self.new_word, text='New Word')
+        self.btn_new_word.grid(row=0, column=0, padx=10, pady=10)
+        self.btn_exit_save = ctk.CTkButton(self.frame_options, command=self.exit_program,
+                                           text='Save & Exit',
+                                           fg_color='transparent',
+                                           border_width=1)
+        self.btn_exit_save.grid(row=2, column=0, padx=10, pady=(40, 10))
+
+        # Check answers
+        self.frame_selection = ctk.CTkFrame(self.frame_user, width=100)
+        self.frame_selection.grid(row=0, column=1, rowspan=3, columnspan=1, padx=(15, 5), pady=10)
+        self.__radio_btn_check = tk.IntVar(value=0)  # Default value set to 0
+        self.radio_btn_dont_know = ctk.CTkRadioButton(master=self.frame_selection,
+                                                      variable=self.__radio_btn_check,
+                                                      value=0,
+                                                      text='I don\'t know')
+        self.radio_btn_dont_know.grid(row=0, column=0, padx=10, pady=10, sticky='e')
+        self.radio_btn_i_know = ctk.CTkRadioButton(master=self.frame_selection,
+                                                   variable=self.__radio_btn_check,
+                                                   value=1,
+                                                   text='I know! :)')
+        self.radio_btn_i_know.grid(row=1, column=0, padx=10, pady=10, sticky='e')
+        self.btn_check_answer = ctk.CTkButton(self.frame_selection, command=self.check_answer, text='Check answer')
+        self.btn_check_answer.grid(row=2, column=0, padx=(10, 10), pady=(5, 10))
+
+    def __build_bottom(self):
+        """Create the bottom layer of the app"""
+        self.label_bottom = ctk.CTkLabel(self, text='Juan Carcedo © 2022-2023', font=ctk.CTkFont(size=10))
+        self.label_bottom.grid(row=3, column=0, columnspan=3, padx=10, pady=(10, 10))
+
+    # Logics / buttons ===================================================================
+    def check_answer(self) -> None:
+        """Show the correct answer. . """
+        if self.get_radio_button_status() == 1:  # User knows the word
+            # Save the word as user knows it
+            self.data.correct_answer()
+
+        # Show correct answer
+        self.set_label_learning_word(self.data.get_word_translated())
+        # Wait 3 seconds and create a new word.
+        # self.wait_time()
+        # # New Word
+        # self.new_word()
+
+    def new_word(self) -> None:
+        """ Create a new word """
+        # Retrieve a new word in the data class
         self.data.new_word()
-        # Hide the answer
-        self.fc_back.grid_remove()
-        self.fc_front.grid()
-        # Write new word in the front flashcard
-        self.fc_front.itemconfig(self.txt_front, text=self.data.guess)
-        self.fc_back.itemconfig(self.txt_back, text=self.data.solution)
+        # Set in the screen the new word
+        self.set_label_learning_word(self.data.get_word_to_guess())
 
-    def bt_correct(self):
-        self.data.correct_answer()
+    def wait_time(self, time_to_wait: int = M_SECONDS_WAIT):
+        """
+        Create idle time to wait.
+        :param time_to_wait: int; if nothing is used, then use the default constant.
+        """
+        self.after(time_to_wait)
 
-    def bt_wrong(self):
-        self.get_new_word()
+    def exit_program(self) -> None:
+        """ Save and Exit """
+        self.data.save_data(self.get_username())
+        self.destroy()
 
-    def bt_show_answer(self):
-        self.fc_front.grid_remove()
-        self.fc_back.grid()
+    # Setters and getters ===========================================================
+    def set_username(self, user: str = '') -> None:
+        """Set the current username.
+        :param user: Current user.
+        """
+        self.__username = user
 
-    def show_full_text(self, message):
-        try:  # Check if error whilst getting data
-            messagebox.showinfo(title='Full text', message=message)
-        except AttributeError:
-            pass
+    def get_username(self):
+        """Get the value of the username."""
+        return self.__username
+
+    def set_label_learning_word(self, value: str = '') -> None:
+        """
+        Set the user entry field.
+        :param value: string to set.
+        :return:
+        """
+        self.__label_learning_word.configure(text=value)
+
+    def get_label_learning_word(self):
+        """Get the value of the word to guess"""
+        return self.__label_learning_word.cget('text')
+
+    def get_radio_button_status(self):
+        """Get the selected radio button"""
+        return self.__radio_btn_check.get()
 
 
 if __name__ == '__main__':
