@@ -4,7 +4,8 @@ Note that your user will be used to save your already-known words and the ones t
   
 ### Version Updates:  
 + v2 -- 2022/11/01 - General redesign.
-+ v3 -- 2023/02/04 - New GUI
++ v3 -- 2023/02/04 - New GUI.
++ v4 -- 2023/06 & 07 - Included setters and getters in the classes.
 
 ## Instructions
 - Create a Fork of the repository (you can access all projects).
