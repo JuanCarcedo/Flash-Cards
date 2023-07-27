@@ -7,6 +7,7 @@ Created on Mon Jul 25 15:59:11 2022
     Updates:
     - v2 2022 Some improvements in code.
     - v3 04/2023 GUI updated using customtkinter by TomSchimansky [https://github.com/TomSchimansky/CustomTkinter]
+    - v4 06/2023 Structure change with properties.
 
 HOW TO IMPROVE THE CODE:
     Use df.to_dict(orient='records') to gather and use the data
@@ -18,6 +19,7 @@ if __name__ == '__main__':
     # Get the username (program based on that)
     username_manager = UsernameManager()
     username_manager.end_screen()
+
     # Create the App (GUI)
-    app = App(username_manager.get_username())
+    app = App(username_manager.username)
     app.end_screen()
